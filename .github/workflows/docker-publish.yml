@@ -27,6 +27,11 @@ jobs:
       # Set up QEMU for multi-architecture building (amd64, arm64)
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
+<<<<<<< HEAD
+=======
+        with:
+          cache-image: false
+>>>>>>> 96927a83b8369932f9cb8cba42479762c66847f0
 
       # Set up Docker Buildx for cached layers compiles
       - name: Set up Docker Buildx
