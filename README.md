@@ -59,19 +59,20 @@ To deploy Weatharr in your own environment, follow these steps:
 Paste the following configuration into a new directory:
 
 ```yaml
-
 services:
   weatharr:
-    image: ghcr.io/weatharr/weatharr:latest
+    # Pull pre-built multi-arch image from GHCR
+    image: ghcr.io/thesuperben/weatharr:latest
     container_name: weatharr-app
     ports:
       - "58080:5000" # Map host port 58080 to Express container port 5000 (serves both React app & APIs)
     environment:
       - PORT=5000
       - NODE_ENV=production
-      - TZ=${TZ:-UTC} # Force container timezone (e.g. Europe/London or Australia/Adelaide)
-      - ADMIN_PIN=1234 # Set a numerical PIN or secure password to lock layouts/settings modifications
+      - TZ=UTC # Force container timezone (e.g. Europe/London, America/New_York, or Australia/Adelaide)
+      - ADMIN_PIN=1234 # Set a numerical PIN or secure password to lock layouts/settings modifications. Leave empty to disable protection.
       - CONFIG_PATH=/app/data/weatharr_config.json
+      - PROFILES_PATH=/app/data/weatharr_profiles.json
       - OPEN_METEO_URL=http://open-meteo:8080/v1/forecast
       - AIR_QUALITY_URL=http://open-meteo:8080/v1/air-quality
       - GEOCODING_URL=https://geocoding-api.open-meteo.com/v1/search
@@ -88,7 +89,7 @@ services:
     expose:
       - "8080"
     environment:
-      - TZ=${TZ:-UTC} # Enforce local server container timezone
+      - TZ=UTC # Enforce local server container timezone
     volumes:
       - open-meteo-data:/app/data
     restart: unless-stopped
@@ -108,8 +109,15 @@ services:
           sleep 10800
         done
     environment:
-      - TZ=${TZ:-UTC} # Enforce sync engine container timezone
-      - WEATHER_MODELS=${WEATHER_MODELS:-ncep_gfs013} # Comma-separated list of models to sync (e.g. ncep_gfs013,bom_access_global)
+      - TZ=UTC # Enforce sync engine container timezone
+      # Comma-separated list of weather models to sync.
+      # Recommended models by continent/region:
+      # - Global: ncep_gfs013 (default), ecmwf_ifs025
+      # - North America: ncep_hrrr_conus_15min (USA 3km), cmc_gem_hrdeps (Canada 2.5km)
+      # - Europe: dwd_icon_eu (Europe 7km), meteofrance_arome_france0025 (France 2.5km)
+      # - Australia: bom_access_c (Cities 1.5km), bom_access_global (12km)
+      # - Asia: jma_msm (Japan 5km), kma_ldps (South Korea 1.5km)
+      - WEATHER_MODELS=ncep_gfs013
     volumes:
       - open-meteo-data:/app/data
     restart: unless-stopped
