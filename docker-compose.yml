@@ -36,13 +36,13 @@ services:
     depends_on:
       - open-meteo
 
-  backend:
+  weatharr:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
-    container_name: weatharr-backend
+    container_name: weatharr-app
     ports:
-      - "5000:5000"
+      - "58080:5000"
     environment:
       - PORT=5000
       - NODE_ENV=production
@@ -57,19 +57,6 @@ services:
     restart: unless-stopped
     depends_on:
       - open-meteo
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: weatharr-frontend
-    ports:
-      - "58080:80"
-    environment:
-      - TZ=${TZ:-UTC}
-    restart: unless-stopped
-    depends_on:
-      - backend
 
 volumes:
   open-meteo-data:

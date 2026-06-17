@@ -530,6 +530,23 @@ app.post('/api/verify-pin', (req, res) => {
   res.status(401).json({ success: false, error: 'Invalid Admin PIN' });
 });
 
+const path = require('path');
+const fs = require('fs');
+
+// Serve static frontend files if compiled inside the container bundle
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  console.log(`Bundled frontend found at ${frontendDistPath}. Serving static assets.`);
+  app.use(express.static(frontendDistPath));
+  
+  // SPA routing fallback for React history navigation
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+} else {
+  console.log(`Running in API-only mode. Frontend dist folder not found.`);
+}
+
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Weatharr Backend listening on http://0.0.0.0:${PORT}`);

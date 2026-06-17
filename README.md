@@ -61,24 +61,15 @@ Paste the following configuration into a new directory:
 ```yaml
 
 services:
-  frontend:
-    image: ghcr.io/weatharr/weatharr-frontend:latest
-    container_name: weatharr-frontend
+  weatharr:
+    image: ghcr.io/weatharr/weatharr:latest
+    container_name: weatharr-app
     ports:
-      - "58080:80" # Map to port 58080 on the host (prevents port conflicts with existing web servers)
-    environment:
-      - TZ=${TZ:-UTC} # Force container timezone (e.g. Europe/London or Australia/Adelaide)
-    restart: unless-stopped
-    depends_on:
-      - backend
-
-  backend:
-    image: ghcr.io/weatharr/weatharr-backend:latest
-    container_name: weatharr-backend
+      - "58080:5000" # Map host port 58080 to Express container port 5000 (serves both React app & APIs)
     environment:
       - PORT=5000
       - NODE_ENV=production
-      - TZ=${TZ:-UTC} # Enforce backend container timezone
+      - TZ=${TZ:-UTC} # Force container timezone (e.g. Europe/London or Australia/Adelaide)
       - ADMIN_PIN=1234 # Set a numerical PIN or secure password to lock layouts/settings modifications
       - CONFIG_PATH=/app/data/weatharr_config.json
       - OPEN_METEO_URL=http://open-meteo:8080/v1/forecast
