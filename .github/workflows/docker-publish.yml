@@ -2,15 +2,15 @@ name: Publish Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
     tags: [ 'v*' ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 env:
   REGISTRY: ghcr.io
-  # Image name formatted as ghcr.io/username/weatharr
-  IMAGE_NAME: ${{ github.repository }}
+  # Hardcoded to lowercase to prevent Docker manifest rejection
+  IMAGE_NAME: ${{ github.repository_owner }}/weatharr
 
 jobs:
   build-and-push:
@@ -22,20 +22,23 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       # Set up QEMU for multi-architecture building (amd64, arm64)
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@v3
+        with:
+          # Explicitly disable caching to prevent the binfmt lock warning
+          cache-image: false
 
       # Set up Docker Buildx for cached layers compiles
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       # Log into GitHub Container Registry (GHCR)
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v4
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -44,19 +47,18 @@ jobs:
       # Extract metadata (tags, labels) for Docker images
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=true
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
 
       # Build and push Docker image with Buildx
       - name: Build and push Docker image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
