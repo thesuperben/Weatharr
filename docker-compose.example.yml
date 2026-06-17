@@ -1,0 +1,110 @@
+# ==============================================================================
+# Weatharr - Example Docker Compose Configuration
+# ==============================================================================
+# Use this configuration template to deploy Weatharr inside your own self-hosted
+# stack. You can run this configuration as-is, customize mapped ports, or plug
+# the services behind a reverse proxy (such as Traefik, Caddy, or Nginx).
+#
+# Usage:
+#   1. Copy this file as 'docker-compose.yml'
+#   2. Run 'docker-compose up -d'
+# ==============================================================================
+
+version: "3.8"
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Weatharr Frontend
+  # ----------------------------------------------------------------------------
+  frontend:
+    # Option A: Pull pre-built image from GitHub Container Registry (Recommended)
+    image: ghcr.io/weatharr/weatharr-frontend:latest
+    # Option B: Build locally if you have cloned the source code repository
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
+    container_name: weatharr-frontend
+    ports:
+      - "58080:80" # Map to port 58080 on the host (prevents port conflicts with existing web servers)
+    environment:
+      - TZ=${TZ:-UTC} # Force container timezone (e.g. Europe/London or Australia/Adelaide)
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  # ----------------------------------------------------------------------------
+  # 2. Weatharr Backend Proxy
+  # ----------------------------------------------------------------------------
+  backend:
+    # Option A: Pull pre-built image from GitHub Container Registry (Recommended)
+    image: ghcr.io/weatharr/weatharr-backend:latest
+    # Option B: Build locally if you have cloned the source code repository
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    container_name: weatharr-backend
+    ports:
+      - "5000:5000" # Map to port 5000 on the host (optional; internal communications are docker-routed)
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - TZ=${TZ:-UTC} # Enforce backend container timezone
+      - ADMIN_PIN=1234 # Set a numerical PIN or secure password to lock layouts/settings modifications
+      - CONFIG_PATH=/app/data/weatharr_config.json
+      - OPEN_METEO_URL=http://open-meteo:8080/v1/forecast
+      - AIR_QUALITY_URL=http://open-meteo:8080/v1/air-quality
+      - GEOCODING_URL=https://geocoding-api.open-meteo.com/v1/search
+    volumes:
+      # Persistent storage path for dashboard layouts, widget state, and fonts
+      - ./data:/app/data
+    restart: unless-stopped
+    depends_on:
+      - open-meteo
+
+  # ----------------------------------------------------------------------------
+  # 3. Local Open-Meteo Server (Offline Weather Database)
+  # ----------------------------------------------------------------------------
+  open-meteo:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: weatharr-open-meteo
+    command: ["serve", "--hostname", "0.0.0.0", "--port", "8080"]
+    expose:
+      - "8080"
+    # Port 8080 mapping can be disabled if you do not want it exposed directly
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=${TZ:-UTC} # Enforce local server container timezone
+    volumes:
+      - open-meteo-data:/app/data
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 4. Open-Meteo Sync Engine (Syncs Global Forecasting System Models)
+  # ----------------------------------------------------------------------------
+  open-meteo-sync:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: weatharr-open-meteo-sync
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          for model in $$(echo $$WEATHER_MODELS | tr ',' ' '); do
+            echo "=== Syncing weather model: $$model ==="
+            open-meteo sync "$$model" temperature_2m,relative_humidity_2m
+          done
+          echo "=== Sync cycle complete. Sleeping for 3 hours ==="
+          sleep 10800
+        done
+    environment:
+      - TZ=${TZ:-UTC} # Enforce sync engine container timezone
+      - WEATHER_MODELS=${WEATHER_MODELS:-ncep_gfs013} # Comma-separated list of models to sync (e.g. ncep_gfs013,bom_access_global)
+    volumes:
+      - open-meteo-data:/app/data
+    restart: unless-stopped
+    depends_on:
+      - open-meteo
+
+volumes:
+  # Internal volume mapping for GFS forecasting grids
+  open-meteo-data:
