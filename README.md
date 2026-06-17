@@ -110,7 +110,7 @@ services:
         done
     environment:
       - TZ=UTC # Enforce sync engine container timezone
-      # Comma-separated list of weather models to sync.
+      # List of weather models to sync. Copy/Paste relevant models into -WEATHER_MODELS comma separated. (e.g. WEATHER_MODELS="ncep_gfs013,ecmwf_ifs025,dwd_icon_eu,bom_access_c,jma_msm")
       # Recommended models by continent/region:
       # - Global: ncep_gfs013 (default), ecmwf_ifs025
       # - North America: ncep_hrrr_conus_15min (USA 3km), cmc_gem_hrdeps (Canada 2.5km)
