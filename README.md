@@ -1,3 +1,5 @@
+
+
 # Weatharr 🌦️
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,7 +9,11 @@
 
 Weatharr is a premium, self-hosted, highly customizable weather dashboard. Built using a modern **dark glassmorphism design system**, it offers a layout engine powered by `react-grid-layout`, advanced SVG observation sparklines, multi-location tab hub navigation, and unique hybrid data layers combining local GFS weather model grids with live OpenWeatherMap API metrics.
 
+<img width="1418" height="1201" alt="image" src="https://github.com/user-attachments/assets/02d7332f-ac54-48e0-a806-be033ef37ffd" />
+
+
 ---
+
 
 ## 🌟 Key Features
 
