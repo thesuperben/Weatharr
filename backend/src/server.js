@@ -72,11 +72,50 @@ app.post('/api/config', async (req, res) => {
   }
 });
 
+function canUseLocal(reqQuery) {
+  if (!process.env.OPEN_METEO_URL && !process.env.AIR_QUALITY_URL) {
+    return false;
+  }
+  
+  const localSyncVarsEnv = process.env.LOCAL_SYNC_VARIABLES;
+  if (localSyncVarsEnv === 'all' || localSyncVarsEnv === '*') {
+    return true;
+  }
+  
+  const syncedVars = (localSyncVarsEnv || 'temperature_2m,relative_humidity_2m')
+    .split(',')
+    .map(v => v.trim());
+    
+  if (reqQuery.current) {
+    const requested = reqQuery.current.split(',');
+    for (const v of requested) {
+      if (!syncedVars.includes(v)) return false;
+    }
+  }
+  
+  if (reqQuery.hourly) {
+    const requested = reqQuery.hourly.split(',');
+    for (const v of requested) {
+      if (!syncedVars.includes(v)) return false;
+    }
+  }
+  
+  if (reqQuery.daily) {
+    const requested = reqQuery.daily.split(',');
+    for (const v of requested) {
+      if (!syncedVars.includes(v)) return false;
+    }
+  }
+  
+  return true;
+}
+
 function hasMissingData(data, reqQuery) {
   if (!data) return true;
   
   // Check current variables
-  if (reqQuery.current && data.current) {
+  if (reqQuery.current) {
+    if (!data.current) return true;
     const requested = reqQuery.current.split(',');
     for (const v of requested) {
       if (data.current[v] === undefined || data.current[v] === null) {
@@ -86,7 +125,8 @@ function hasMissingData(data, reqQuery) {
   }
 
   // Check hourly variables
-  if (reqQuery.hourly && data.hourly) {
+  if (reqQuery.hourly) {
+    if (!data.hourly) return true;
     const requested = reqQuery.hourly.split(',');
     for (const v of requested) {
       if (!data.hourly[v] || data.hourly[v][0] === null || data.hourly[v][0] === undefined) {
@@ -96,7 +136,8 @@ function hasMissingData(data, reqQuery) {
   }
 
   // Check daily variables
-  if (reqQuery.daily && data.daily) {
+  if (reqQuery.daily) {
+    if (!data.daily) return true;
     const requested = reqQuery.daily.split(',');
     for (const v of requested) {
       if (!data.daily[v] || data.daily[v][0] === null || data.daily[v][0] === undefined) {
@@ -109,29 +150,31 @@ function hasMissingData(data, reqQuery) {
 }
 
 // Helper for fetching with local/public fallback validating data completeness
-async function fetchWithFallback(localBase, publicBase, queryParams, parsedQuery) {
+async function fetchWithFallback(localBase, publicBase, queryParams, parsedQuery, useLocal = true) {
   const localUrl = `${localBase}?${queryParams}`;
   const publicUrl = `${publicBase}?${queryParams}`;
 
-  // Try local first
-  try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 3000); // 3 second timeout for local
+  // Try local first if permitted
+  if (useLocal) {
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 3000); // 3 second timeout for local
 
-    const response = await fetch(localUrl, { signal: controller.signal });
-    clearTimeout(id);
+      const response = await fetch(localUrl, { signal: controller.signal });
+      clearTimeout(id);
 
-    if (response.ok) {
-      const data = await response.json();
-      if (!hasMissingData(data, parsedQuery)) {
-        return { data, source: 'local' };
+      if (response.ok) {
+        const data = await response.json();
+        if (!hasMissingData(data, parsedQuery)) {
+          return { data, source: 'local' };
+        }
+        console.log(`Local Open-Meteo returned incomplete data structure for this query. Using public API fallback...`);
+      } else {
+        console.warn(`Local API responded with status: ${response.status}. Falling back...`);
       }
-      console.warn(`Local Open-Meteo returned incomplete data structure. Falling back to public API...`);
-    } else {
-      console.warn(`Local API responded with status: ${response.status}. Falling back...`);
+    } catch (error) {
+      console.warn(`Local Open-Meteo failed (${error.message || 'Timeout'}). Falling back to public API...`);
     }
-  } catch (error) {
-    console.warn(`Local Open-Meteo failed (${error.message || 'Timeout'}). Falling back to public API...`);
   }
 
   // Fallback to public
@@ -165,7 +208,7 @@ app.get('/api/weather', async (req, res) => {
     const localBase = process.env.OPEN_METEO_URL || 'http://open-meteo:8080/v1/forecast';
     const publicBase = 'https://api.open-meteo.com/v1/forecast';
 
-    let { data, source } = await fetchWithFallback(localBase, publicBase, queryParamsString, openMeteoParams);
+    let { data, source } = await fetchWithFallback(localBase, publicBase, queryParamsString, openMeteoParams, canUseLocal(openMeteoParams));
     
     // Retrieve saved OpenWeatherMap API Key from backend storage to protect key leakage
     let owmApiKey = null;
@@ -272,7 +315,7 @@ app.get('/api/air_quality', async (req, res) => {
     const localBase = process.env.AIR_QUALITY_URL || 'http://open-meteo:8080/v1/air-quality';
     const publicBase = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 
-    const { data, source } = await fetchWithFallback(localBase, publicBase, queryParamsString, params);
+    const { data, source } = await fetchWithFallback(localBase, publicBase, queryParamsString, params, canUseLocal(params));
 
     const responsePayload = { data, source };
     weatherCache.set(cacheKey, responsePayload);

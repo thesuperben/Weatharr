@@ -10,6 +10,7 @@ export default function Dashboard({
   aqiData,
   units,
   isEditMode,
+  isMobile,
   onDeleteWidget,
   onUpdateWidgetProps,
   onLayoutChange,
@@ -52,6 +53,67 @@ export default function Dashboard({
     minH: 2,
     static: !isEditMode
   }));
+
+  if (isMobile) {
+    return (
+      <div 
+        className="dashboard-canvas" 
+        style={{ 
+          width: '100%', 
+          minHeight: 'calc(100vh - 120px)',
+          position: 'relative',
+          borderRadius: '24px',
+          padding: '8px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '18px'
+        }}
+      >
+        {widgets.length === 0 ? (
+          <div 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '300px',
+              background: 'var(--glass-bg)',
+              backdropFilter: 'var(--glass-blur)',
+              border: '1px dashed var(--glass-border)',
+              borderRadius: '24px',
+              color: 'var(--text-secondary)',
+              gap: '12px',
+              padding: '24px',
+              textAlign: 'center'
+            }}
+          >
+            <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Dashboard Empty</h3>
+            <p style={{ fontSize: '14px', maxWidth: '400px' }}>
+              Open the <strong>Control Center</strong> and add weather widgets to configure your dashboard canvas.
+            </p>
+          </div>
+        ) : (
+          widgets.map((w) => (
+            <div key={w.id} style={{ width: '100%', height: `${w.h * 95 + (w.h - 1) * 18}px` }}>
+              <WeatherWidget
+                type={w.type}
+                weatherData={weatherData}
+                aqiData={aqiData}
+                units={units}
+                isEditMode={isEditMode}
+                isMobile={true}
+                onDelete={() => onDeleteWidget(w.id)}
+                font={w.font}
+                onUpdateFont={(font) => onUpdateWidgetProps(w.id, { font })}
+                widgetProps={w}
+                onUpdateProps={(newProps) => onUpdateWidgetProps(w.id, newProps)}
+              />
+            </div>
+          ))
+        )}
+      </div>
+    );
+  }
 
   return (
     <div 

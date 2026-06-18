@@ -140,6 +140,7 @@ export default function App() {
   // UI state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isEditMode, setEditModeState] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [weatherData, setWeatherData] = useState(null);
   const [aqiData, setAqiData] = useState(null);
   
@@ -248,6 +249,16 @@ export default function App() {
       setFetchingData(false);
     }
   };
+
+  // Viewport resize handler to detect mobile screens
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch dashboard settings from Backend
   useEffect(() => {
@@ -864,10 +875,30 @@ export default function App() {
 
   return (
     <div className="app-container" style={fontStyle}>
+      {/* Sidebar Backdrop Overlay on Mobile */}
+      {isSidebarOpen && isMobile && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            zIndex: 999,
+            transition: 'opacity 0.3s ease'
+          }}
+        />
+      )}
+
       {/* Sliding Control Sidebar */}
       <Sidebar 
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        isMobile={isMobile}
         units={units}
         setUnits={setUnits}
         globalFont={globalFont}
@@ -890,7 +921,7 @@ export default function App() {
       />
 
       {/* Main Page Layout */}
-      <main className="main-content" style={{ paddingLeft: isSidebarOpen ? '340px' : '24px' }}>
+      <main className="main-content" style={{ paddingLeft: isMobile ? '12px' : (isSidebarOpen ? '340px' : '24px') }}>
         
         {/* Dynamic Warning/Error Toast */}
         {error && (
@@ -984,19 +1015,21 @@ export default function App() {
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             
             {/* Quick Edit-Mode Toggle Button */}
-            <button 
-              onClick={() => setEditMode(!isEditMode)}
-              className="btn"
-              title={isEditMode ? "Lock Canvas Layout" : "Unlock Canvas Layout"}
-              style={{
-                borderColor: isEditMode ? 'var(--accent-orange)' : 'var(--glass-border)',
-                background: isEditMode ? 'var(--accent-orange-glow)' : 'transparent',
-                color: isEditMode ? 'var(--accent-orange)' : 'var(--text-primary)'
-              }}
-            >
-              {isEditMode ? <Unlock size={16} /> : <Lock size={16} />}
-              <span>{isEditMode ? "Layout Unlocked" : "Lock Layout"}</span>
-            </button>
+            {!isMobile && (
+              <button 
+                onClick={() => setEditMode(!isEditMode)}
+                className="btn"
+                title={isEditMode ? "Lock Canvas Layout" : "Unlock Canvas Layout"}
+                style={{
+                  borderColor: isEditMode ? 'var(--accent-orange)' : 'var(--glass-border)',
+                  background: isEditMode ? 'var(--accent-orange-glow)' : 'transparent',
+                  color: isEditMode ? 'var(--accent-orange)' : 'var(--text-primary)'
+                }}
+              >
+                {isEditMode ? <Unlock size={16} /> : <Lock size={16} />}
+                <span>{isEditMode ? "Layout Unlocked" : "Lock Layout"}</span>
+              </button>
+            )}
 
             {/* Main Menu Button */}
             <button 
@@ -1017,6 +1050,7 @@ export default function App() {
             gap: '8px',
             marginBottom: '20px',
             overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
             paddingBottom: '8px',
             borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
           }}
@@ -1097,6 +1131,7 @@ export default function App() {
           aqiData={aqiData}
           units={units}
           isEditMode={isEditMode}
+          isMobile={isMobile}
           onDeleteWidget={handleDeleteWidget}
           onUpdateWidgetProps={handleUpdateWidgetProps}
           onLayoutChange={handleLayoutChange}

@@ -109,7 +109,7 @@ services:
         while true; do
           for model in $$(echo $$WEATHER_MODELS | tr ',' ' '); do
             echo "=== Syncing weather model: $$model ==="
-            open-meteo sync "$$model" temperature_2m,relative_humidity_2m
+            /app/openmeteo-api sync "$$model" temperature_2m,relative_humidity_2m
           done
           echo "=== Sync cycle complete. Sleeping for 3 hours ==="
           sleep 10800

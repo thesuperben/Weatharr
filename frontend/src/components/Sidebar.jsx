@@ -6,6 +6,7 @@ import {
 export default function Sidebar({
   isOpen,
   onClose,
+  isMobile = false,
   units,
   setUnits,
   globalFont,
@@ -95,56 +96,60 @@ export default function Sidebar({
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px', paddingRight: '4px' }}>
         
         {/* 1. Dashboard Layout Lock */}
-        <div>
-          <h4 style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 'bold' }}>
-            Dashboard State
-          </h4>
-          <button 
-            onClick={() => setEditMode(!isEditMode)}
-            className={`btn ${isEditMode ? 'btn-primary' : ''}`}
-            style={{ 
-              width: '100%', 
-              justifyContent: 'center',
-              background: isEditMode ? 'var(--accent-blue)' : 'rgba(255,255,255,0.03)',
-              boxShadow: isEditMode ? '0 0 12px var(--accent-blue-glow)' : 'none'
-            }}
-          >
-            {isEditMode ? (
-              <>
-                <Unlock size={16} />
-                <span>Lock Dashboard (Edit Active)</span>
-              </>
-            ) : (
-              <>
-                <Lock size={16} />
-                <span>Unlock & Edit Widgets</span>
-              </>
-            )}
-          </button>
-        </div>
+        {!isMobile && (
+          <>
+            <div>
+              <h4 style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 'bold' }}>
+                Dashboard State
+              </h4>
+              <button 
+                onClick={() => setEditMode(!isEditMode)}
+                className={`btn ${isEditMode ? 'btn-primary' : ''}`}
+                style={{ 
+                  width: '100%', 
+                  justifyContent: 'center',
+                  background: isEditMode ? 'var(--accent-blue)' : 'rgba(255,255,255,0.03)',
+                  boxShadow: isEditMode ? '0 0 12px var(--accent-blue-glow)' : 'none'
+                }}
+              >
+                {isEditMode ? (
+                  <>
+                    <Unlock size={16} />
+                    <span>Lock Dashboard (Edit Active)</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock size={16} />
+                    <span>Unlock & Edit Widgets</span>
+                  </>
+                )}
+              </button>
+            </div>
 
-        {/* 1b. Auto-Arrange Layout */}
-        <div>
-          <h4 style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 'bold' }}>
-            Auto-Arrange Canvas
-          </h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <button
-              onClick={() => onAutoArrange('pack')}
-              className="btn"
-              style={{ fontSize: '11px', justifyContent: 'center', padding: '8px' }}
-            >
-              Dense Grid Pack
-            </button>
-            <button
-              onClick={() => onAutoArrange('portrait')}
-              className="btn"
-              style={{ fontSize: '11px', justifyContent: 'center', padding: '8px' }}
-            >
-              Portrait Stack (9:16)
-            </button>
-          </div>
-        </div>
+            {/* 1b. Auto-Arrange Layout */}
+            <div>
+              <h4 style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 'bold' }}>
+                Auto-Arrange Canvas
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  onClick={() => onAutoArrange('pack')}
+                  className="btn"
+                  style={{ fontSize: '11px', justifyContent: 'center', padding: '8px' }}
+                >
+                  Dense Grid Pack
+                </button>
+                <button
+                  onClick={() => onAutoArrange('portrait')}
+                  className="btn"
+                  style={{ fontSize: '11px', justifyContent: 'center', padding: '8px' }}
+                >
+                  Portrait Stack (9:16)
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* 2. Global Units Selector */}
         <div>

@@ -81,7 +81,7 @@ const formatWind = (val, unit) => val != null ? `${Math.round(val)} ${unit === '
 const formatPrecip = (val, unit) => val != null ? `${val.toFixed(1)} ${unit === 'imperial' ? 'in' : 'mm'}` : `0.0 ${unit === 'imperial' ? 'in' : 'mm'}`;
 
 // Widget Header Component with per-widget font customizer
-function WidgetHeader({ title, type, isEditMode, onDelete, font, onUpdateFont, onDragStart }) {
+function WidgetHeader({ title, type, isEditMode, isMobile = false, onDelete, font, onUpdateFont, onDragStart }) {
   return (
     <div 
       className="widget-header" 
@@ -96,7 +96,7 @@ function WidgetHeader({ title, type, isEditMode, onDelete, font, onUpdateFont, o
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-        {isEditMode && (
+        {isEditMode && !isMobile && (
           <span className="widget-drag-handle" onMouseDown={onDragStart} style={{ display: 'flex', color: 'var(--text-muted)' }}>
             <GripHorizontal size={16} />
           </span>
@@ -1307,7 +1307,7 @@ function HistoricalWeatherWidget({ data, units }) {
 /* ----------------------------------------------------
    WIDGET FACTORY MAIN CONTAINER
 ---------------------------------------------------- */
-export default function WeatherWidget({ type, weatherData, aqiData, units, isEditMode, onDelete, font, onUpdateFont, onDragStart, widgetProps, onUpdateProps }) {
+export default function WeatherWidget({ type, weatherData, aqiData, units, isEditMode, isMobile = false, onDelete, font, onUpdateFont, onDragStart, widgetProps, onUpdateProps }) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const widgetConfigs = {
@@ -1487,6 +1487,7 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
             title={config.title} 
             type={type}
             isEditMode={isEditMode} 
+            isMobile={isMobile}
             onDelete={onDelete} 
             font={font}
             onUpdateFont={onUpdateFont}
@@ -1519,6 +1520,7 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
             title={`${config.title} - Info`} 
             type={type}
             isEditMode={false} 
+            isMobile={isMobile}
           />
           <div 
             style={{ 
