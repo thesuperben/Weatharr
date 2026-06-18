@@ -83,8 +83,8 @@ const formatPrecip = (val, unit) => val != null ? `${val.toFixed(1)} ${unit === 
 // Widget Header Component with per-widget font customizer
 function WidgetHeader({ title, type, isEditMode, isMobile = false, onDelete, font, onUpdateFont, onDragStart }) {
   return (
-    <div 
-      className="widget-header" 
+    <div
+      className="widget-header"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -101,12 +101,12 @@ function WidgetHeader({ title, type, isEditMode, isMobile = false, onDelete, fon
             <GripHorizontal size={16} />
           </span>
         )}
-        <span 
-          style={{ 
-            fontSize: '11px', 
-            fontWeight: '600', 
-            textTransform: 'uppercase', 
-            letterSpacing: '0.05em', 
+        <span
+          style={{
+            fontSize: '11px',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
             color: 'var(--text-secondary)',
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis',
@@ -115,13 +115,13 @@ function WidgetHeader({ title, type, isEditMode, isMobile = false, onDelete, fon
         >
           {title}
         </span>
-        
+
         {/* Info indicator */}
         <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-muted)' }} title="Click card for details">
           <Info size={12} style={{ cursor: 'pointer' }} />
         </span>
       </div>
-      
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         {isEditMode && (
           <select
@@ -150,8 +150,8 @@ function WidgetHeader({ title, type, isEditMode, isMobile = false, onDelete, fon
         )}
 
         {isEditMode && (
-          <button 
-            onClick={onDelete} 
+          <button
+            onClick={onDelete}
             style={{
               background: 'none',
               border: 'none',
@@ -295,11 +295,11 @@ function HourlyForecastWidget({ data, units }) {
   return (
     <div style={{ flex: 1, padding: '12px 16px 16px 16px', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       {/* Selector controls for active chart type */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           marginBottom: '8px',
           paddingBottom: '6px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -316,7 +316,7 @@ function HourlyForecastWidget({ data, units }) {
               uv: 'UV',
               wind: 'Wind'
             }[m];
-            
+
             return (
               <button
                 key={m}
@@ -359,8 +359,8 @@ function HourlyForecastWidget({ data, units }) {
       </div>
 
       <div style={{ flex: 1, minHeight: 0 }}>
-        <WeatherChart 
-          labels={times} 
+        <WeatherChart
+          labels={times}
           series={series}
           sunMarkers={sunMarkers}
           currentHourMarker={currentHourIndex}
@@ -374,7 +374,7 @@ function HourlyForecastWidget({ data, units }) {
 function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, showUV = false, showRain = false, showSun = false, onUpdateProps }) {
   const daily = data.daily;
   const limit = daysCount || 7;
-  
+
   const formatTime = (isoString) => {
     if (!isoString) return '--:--';
     const date = new Date(isoString);
@@ -391,7 +391,7 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
     const max = daily.temperature_2m_max ? daily.temperature_2m_max[actualIdx] : null;
     const min = daily.temperature_2m_min ? daily.temperature_2m_min[actualIdx] : null;
     const rainProb = daily.precipitation_probability_max ? daily.precipitation_probability_max[actualIdx] : 0;
-    
+
     const wind = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[actualIdx] : null;
     const uv = daily.uv_index_max ? daily.uv_index_max[actualIdx] : null;
     const rainAmt = daily.precipitation_sum ? daily.precipitation_sum[actualIdx] : null;
@@ -404,12 +404,12 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '12px 16px', overflowY: 'auto' }}>
       {/* Control row for range select & toggle features */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          marginBottom: '10px', 
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '10px',
           paddingBottom: '8px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           flexWrap: 'wrap',
@@ -532,12 +532,12 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
         const info = getWeatherInfo(day.code);
         const DayIcon = info.icon;
         return (
-          <div 
-            key={idx} 
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              padding: '6px 0', 
+          <div
+            key={idx}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '6px 0',
               borderBottom: idx === days.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)'
             }}
           >
@@ -547,7 +547,7 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
                 <span style={{ fontSize: '13px', fontWeight: '500' }}>{day.dayName}</span>
                 <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{day.dateStr}</span>
               </div>
-              
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '60px', flexShrink: 0 }}>
                 <DayIcon size={16} style={{ color: info.color }} />
                 {day.rainProb > 15 && (
@@ -559,9 +559,9 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', marginLeft: 'auto', flexShrink: 0 }}>
                 <span style={{ color: 'var(--text-secondary)', width: '24px', textAlign: 'right' }}>{day.min != null ? Math.round(day.min) : '--'}°</span>
-                
+
                 <div style={{ width: '35px', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', position: 'relative' }}>
-                  <div 
+                  <div
                     style={{
                       position: 'absolute',
                       left: '20%',
@@ -614,7 +614,7 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
 function UVIndexWidget({ data }) {
   const current = data.current;
   const uv = current.uv_index;
-  
+
   let level = 'Low';
   let color = 'var(--accent-green)';
   let advice = 'Safe to be outdoors.';
@@ -656,15 +656,15 @@ function UVIndexWidget({ data }) {
       </div>
 
       <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', position: 'relative', margin: '8px 0' }}>
-        <div 
-          style={{ 
-            height: '100%', 
-            width: `${pct}%`, 
-            background: color, 
-            borderRadius: '3px', 
+        <div
+          style={{
+            height: '100%',
+            width: `${pct}%`,
+            background: color,
+            borderRadius: '3px',
             boxShadow: `0 0 8px ${color}`,
             transition: 'width 0.5s ease-out'
-          }} 
+          }}
         />
       </div>
 
@@ -700,7 +700,7 @@ function WindStatusWidget({ data, units }) {
           </span>
         </div>
 
-        <div 
+        <div
           style={{
             width: '46px',
             height: '46px',
@@ -714,9 +714,9 @@ function WindStatusWidget({ data, units }) {
           }}
         >
           <span style={{ position: 'absolute', top: '1px', fontSize: '8px', fontWeight: 'bold', color: 'var(--text-muted)' }}>N</span>
-          <div 
-            style={{ 
-              transform: `rotate(${dir || 0}deg)`, 
+          <div
+            style={{
+              transform: `rotate(${dir || 0}deg)`,
               transition: 'transform 0.8s ease-in-out',
               display: 'flex',
               alignItems: 'center',
@@ -817,7 +817,7 @@ function HumidityWidget({ data, units }) {
   const isFog = current.weather_code != null && [45, 48].includes(current.weather_code);
 
   const WeatherBadge = ({ active, label, color, icon: Icon }) => (
-    <div 
+    <div
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -916,7 +916,7 @@ function PressureWidget({ data }) {
       const y = 30 - ((val - minP) / rangeP) * 22; // 8 to 30 range
       return { x, y, value: val };
     });
-    
+
     dPath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
     const currentP = pressureTrace[nowIdxInTrace] || pressure || 1013;
@@ -957,31 +957,31 @@ function PressureWidget({ data }) {
       {pressureTrace.length > 0 && (
         <div style={{ position: 'relative', height: '35px', margin: '4px 0', borderTop: '1px dashed rgba(255,255,255,0.05)', paddingTop: '4px' }}>
           <svg width="100%" height="100%" viewBox="0 0 240 35" preserveAspectRatio="none">
-            <path 
-              d={dPath} 
-              fill="none" 
-              stroke="var(--accent-blue)" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
+            <path
+              d={dPath}
+              fill="none"
+              stroke="var(--accent-blue)"
+              strokeWidth="2"
+              strokeLinecap="round"
               strokeLinejoin="round"
               style={{ filter: 'drop-shadow(0 0 3px rgba(59,130,246,0.4))' }}
             />
             {points[nowIdxInTrace] && (
-              <line 
-                x1={points[nowIdxInTrace].x} 
-                y1="0" 
-                x2={points[nowIdxInTrace].x} 
-                y2="35" 
-                stroke="rgba(255,255,255,0.25)" 
-                strokeDasharray="2,2" 
+              <line
+                x1={points[nowIdxInTrace].x}
+                y1="0"
+                x2={points[nowIdxInTrace].x}
+                y2="35"
+                stroke="rgba(255,255,255,0.25)"
+                strokeDasharray="2,2"
               />
             )}
             {points[nowIdxInTrace] && (
-              <circle 
-                cx={points[nowIdxInTrace].x} 
-                cy={points[nowIdxInTrace].y} 
-                r="3.5" 
-                fill="var(--accent-orange)" 
+              <circle
+                cx={points[nowIdxInTrace].x}
+                cy={points[nowIdxInTrace].y}
+                r="3.5"
+                fill="var(--accent-orange)"
                 style={{ filter: 'drop-shadow(0 0 4px var(--accent-orange))' }}
               />
             )}
@@ -1048,11 +1048,11 @@ function SunriseSunsetWidget({ data }) {
         <svg width="100%" height="100%" viewBox="0 0 200 30" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, top: 0 }}>
           <path d="M 10,30 A 90,25 0 0,1 190,30" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
           {sunPct > 0 && sunPct < 100 && (
-            <circle 
-              cx={10 + (sunPct / 100) * 180} 
-              cy={30 - Math.sin((sunPct / 100) * Math.PI) * 22} 
-              r="3.5" 
-              fill="var(--accent-orange)" 
+            <circle
+              cx={10 + (sunPct / 100) * 180}
+              cy={30 - Math.sin((sunPct / 100) * Math.PI) * 22}
+              r="3.5"
+              fill="var(--accent-orange)"
               style={{ filter: 'drop-shadow(0 0 5px var(--accent-orange))' }}
             />
           )}
@@ -1080,7 +1080,7 @@ function AirQualityWidget({ aqi }) {
 
   const current = aqi.current;
   const usAqi = current.us_aqi || 0;
-  
+
   const pollenTypes = [
     { label: 'Grass', value: current.grass_pollen },
     { label: 'Birch', value: current.birch_pollen },
@@ -1090,7 +1090,7 @@ function AirQualityWidget({ aqi }) {
     { label: 'Mugwort', value: current.mugwort_pollen }
   ];
   const maxPollen = pollenTypes.reduce((max, p) => (p.value > (max?.value || 0) ? p : max), null);
-  
+
   let aqiLabel = 'Good';
   let aqiColor = 'var(--accent-green)';
   let advice = 'Air is satisfactory.';
@@ -1112,15 +1112,15 @@ function AirQualityWidget({ aqi }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '16px', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-        <div 
-          style={{ 
-            width: '42px', 
-            height: '42px', 
-            borderRadius: '10px', 
-            border: `2px solid ${aqiColor}`, 
-            display: 'flex', 
+        <div
+          style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '10px',
+            border: `2px solid ${aqiColor}`,
+            display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center', 
+            alignItems: 'center',
             justifyContent: 'center',
             background: 'rgba(0,0,0,0.2)',
             flexShrink: 0
@@ -1197,7 +1197,7 @@ function HistoricalWeatherWidget({ data, units }) {
         const response = await fetch(`/api/historical?${query}`);
         if (!response.ok) throw new Error('Historical weather retrieval failed');
         const payload = await response.json();
-        
+
         setHistData(payload.data);
       } catch (err) {
         console.error(err);
@@ -1233,7 +1233,7 @@ function HistoricalWeatherWidget({ data, units }) {
   const maxTemp = hist.temperature_2m_max ? hist.temperature_2m_max[0] : null;
   const minTemp = hist.temperature_2m_min ? hist.temperature_2m_min[0] : null;
   const rain = hist.precipitation_sum ? hist.precipitation_sum[0] : null;
-  
+
   const weatherInfo = getWeatherInfo(code, 1);
   const WeatherIcon = weatherInfo.icon;
 
@@ -1248,7 +1248,7 @@ function HistoricalWeatherWidget({ data, units }) {
 
     let diff = maxTemp - todayMax;
     let label = '';
-    
+
     if (Math.abs(diff) < 1.0) {
       label = 'similar temperature';
     } else {
@@ -1309,7 +1309,7 @@ function HistoricalWeatherWidget({ data, units }) {
 ---------------------------------------------------- */
 export default function WeatherWidget({ type, weatherData, aqiData, units, isEditMode, isMobile = false, onDelete, font, onUpdateFont, onDragStart, widgetProps, onUpdateProps }) {
   const [isFlipped, setIsFlipped] = useState(false);
-  
+
   const widgetConfigs = {
     current: { title: 'Current Weather', component: CurrentWeatherWidget },
     hourly: { title: 'Hourly Forecast', component: HourlyForecastWidget },
@@ -1331,7 +1331,7 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
 
   const WidgetContent = config.component;
 
-  const fontStyle = font ? { 
+  const fontStyle = font ? {
     fontFamily: `'${font}', sans-serif`,
     '--font-title': `'${font}', sans-serif`,
     '--font-body': `'${font}', sans-serif`
@@ -1343,11 +1343,11 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
     const targetTag = e.target.tagName.toLowerCase();
     // Don't flip if clicking interactive controls
     if (
-      targetTag === 'select' || 
-      targetTag === 'button' || 
-      targetTag === 'option' || 
-      targetTag === 'input' || 
-      e.target.closest('button') || 
+      targetTag === 'select' ||
+      targetTag === 'button' ||
+      targetTag === 'option' ||
+      targetTag === 'input' ||
+      e.target.closest('button') ||
       e.target.closest('select')
     ) {
       return;
@@ -1436,7 +1436,7 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
         const aqiVal = aqiData.current.us_aqi || 0;
         let aqiLabel = 'Good';
         let laymanMeaning = 'Air quality is satisfactory, and air pollution poses little or no risk. It is perfectly safe to open windows and spend time outdoors.';
-        
+
         if (aqiVal >= 51 && aqiVal <= 100) {
           aqiLabel = 'Moderate';
           laymanMeaning = 'Air quality is acceptable; however, there may be a risk for some people, particularly those who are unusually sensitive to air pollution.';
@@ -1447,7 +1447,7 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
           aqiLabel = 'Unhealthy';
           laymanMeaning = 'Everyone may begin to experience health effects, and members of sensitive groups may experience more serious health effects. Outdoor activities should be limited.';
         }
-        
+
         const cur = aqiData.current;
         let pollenInfo = '';
         const activeList = [];
@@ -1457,13 +1457,13 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
         if (cur.ragweed_pollen > 0) activeList.push(`Ragweed: ${Math.round(cur.ragweed_pollen)}/m³`);
         if (cur.olive_pollen > 0) activeList.push(`Olive: ${Math.round(cur.olive_pollen)}/m³`);
         if (cur.mugwort_pollen > 0) activeList.push(`Mugwort: ${Math.round(cur.mugwort_pollen)}/m³`);
-        
+
         if (activeList.length > 0) {
           pollenInfo = ` Active Pollen counts: ${activeList.join(', ')}.`;
         } else {
           pollenInfo = ` No active pollen counts detected.`;
         }
-        
+
         return `The Air Quality Index is ${Math.round(aqiVal)} (US EPA AQI), which is classified as "${aqiLabel}". In layman's terms: ${laymanMeaning} (PM2.5: ${cur.pm2_5 != null ? cur.pm2_5.toFixed(1) : '0.0'} µg/m³, PM10: ${cur.pm10 != null ? cur.pm10.toFixed(1) : '0.0'} µg/m³).${pollenInfo}`;
       }
       case 'historical': {
@@ -1480,25 +1480,25 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
   return (
     <div className={`card-flip-container ${isFlipped ? 'flipped' : ''}`} style={fontStyle} onClick={handleCardClick}>
       <div className="card-flipper">
-        
+
         {/* FRONT SIDE */}
         <div className="card-front glass-card">
-          <WidgetHeader 
-            title={config.title} 
+          <WidgetHeader
+            title={config.title}
             type={type}
-            isEditMode={isEditMode} 
+            isEditMode={isEditMode}
             isMobile={isMobile}
-            onDelete={onDelete} 
+            onDelete={onDelete}
             font={font}
             onUpdateFont={onUpdateFont}
             onDragStart={onDragStart}
           />
           <div style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden', borderRadius: '0 0 20px 20px' }}>
             {weatherData ? (
-              <WidgetContent 
-                data={weatherData} 
-                aqi={aqiData} 
-                units={units} 
+              <WidgetContent
+                data={weatherData}
+                aqi={aqiData}
+                units={units}
                 daysCount={widgetProps?.daysCount}
                 showWind={widgetProps?.showWind}
                 showUV={widgetProps?.showUV}
@@ -1516,19 +1516,19 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
 
         {/* BACK SIDE */}
         <div className="card-back glass-card">
-          <WidgetHeader 
-            title={`${config.title} - Info`} 
+          <WidgetHeader
+            title={`${config.title} - Info`}
             type={type}
-            isEditMode={false} 
+            isEditMode={false}
             isMobile={isMobile}
           />
-          <div 
-            style={{ 
-              flex: 1, 
-              padding: '16px', 
-              fontSize: '11px', 
-              lineHeight: '1.4', 
-              color: 'var(--text-secondary)', 
+          <div
+            style={{
+              flex: 1,
+              padding: '16px',
+              fontSize: '11px',
+              lineHeight: '1.4',
+              color: 'var(--text-secondary)',
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
