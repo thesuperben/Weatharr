@@ -411,7 +411,9 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
           justifyContent: 'space-between', 
           marginBottom: '10px', 
           paddingBottom: '8px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)'
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          flexWrap: 'wrap',
+          gap: '8px'
         }}
       >
         <select
@@ -435,7 +437,7 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
           <option value={16} style={{ background: '#111827', color: '#fff' }}>16 Days</option>
         </select>
 
-        <div style={{ display: 'flex', gap: '6px' }}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           <button
             onClick={() => onUpdateProps({ showWind: !showWind })}
             title="Toggle Wind Speed"
@@ -534,72 +536,73 @@ function DailyForecastWidget({ data, units, daysCount = 7, showWind = false, sho
             key={idx} 
             style={{ 
               display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between', 
-              padding: '8px 0', 
-              borderBottom: idx === days.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)',
-              gap: '8px'
+              flexDirection: 'column', 
+              padding: '6px 0', 
+              borderBottom: idx === days.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)'
             }}
           >
-            {/* Day and calendar date matched */}
-            <div style={{ display: 'flex', flexDirection: 'column', width: '55px', flexShrink: 0 }}>
-              <span style={{ fontSize: '13px', fontWeight: '500' }}>{day.dayName}</span>
-              <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{day.dateStr}</span>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '60px', flexShrink: 0 }}>
-              <DayIcon size={16} style={{ color: info.color }} />
-              {day.rainProb > 15 && (
-                <span style={{ fontSize: '10px', color: 'var(--accent-teal)', fontWeight: '500' }}>
-                  {day.rainProb}%
-                </span>
-              )}
-            </div>
-
-            {/* Optional columns */}
-            {showWind && (
-              <span style={{ fontSize: '11px', color: 'var(--accent-purple)', width: '55px', textAlign: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                💨{day.wind != null ? `${Math.round(day.wind)}` : '--'}<span style={{ fontSize: '8px', opacity: 0.7 }}>{units === 'metric' ? 'k/h' : 'mph'}</span>
-              </span>
-            )}
-
-            {showUV && (
-              <span style={{ fontSize: '11px', color: 'var(--accent-orange)', width: '40px', textAlign: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                ☀️{day.uv != null ? Math.round(day.uv) : '--'}
-              </span>
-            )}
-
-            {showRain && (
-              <span style={{ fontSize: '11px', color: 'var(--accent-teal)', width: '50px', textAlign: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                💧{day.rainAmt != null ? `${day.rainAmt.toFixed(1)}` : '0.0'}<span style={{ fontSize: '8px', opacity: 0.7 }}>{units === 'imperial' ? 'in' : 'mm'}</span>
-              </span>
-            )}
-
-            {showSun && (
-              <span style={{ fontSize: '10px', color: 'var(--accent-orange)', width: '75px', textAlign: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                🌅 {formatTime(day.sunrise)} / 🌇 {formatTime(day.sunset)}
-              </span>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', marginLeft: 'auto', flexShrink: 0 }}>
-              <span style={{ color: 'var(--text-secondary)', width: '24px', textAlign: 'right' }}>{day.min != null ? Math.round(day.min) : '--'}°</span>
+            {/* ROW 1: Primary Parameters (Always fits) */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', width: '55px', flexShrink: 0 }}>
+                <span style={{ fontSize: '13px', fontWeight: '500' }}>{day.dayName}</span>
+                <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{day.dateStr}</span>
+              </div>
               
-              <div style={{ width: '35px', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', position: 'relative' }}>
-                <div 
-                  style={{
-                    position: 'absolute',
-                    left: '20%',
-                    right: '20%',
-                    top: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-orange))',
-                    borderRadius: '2px'
-                  }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '60px', flexShrink: 0 }}>
+                <DayIcon size={16} style={{ color: info.color }} />
+                {day.rainProb > 15 && (
+                  <span style={{ fontSize: '10px', color: 'var(--accent-teal)', fontWeight: '500' }}>
+                    {day.rainProb}%
+                  </span>
+                )}
               </div>
 
-              <span style={{ fontWeight: '600', width: '24px', textAlign: 'right' }}>{day.max != null ? Math.round(day.max) : '--'}°</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', marginLeft: 'auto', flexShrink: 0 }}>
+                <span style={{ color: 'var(--text-secondary)', width: '24px', textAlign: 'right' }}>{day.min != null ? Math.round(day.min) : '--'}°</span>
+                
+                <div style={{ width: '35px', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', position: 'relative' }}>
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      left: '20%',
+                      right: '20%',
+                      top: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-orange))',
+                      borderRadius: '2px'
+                    }}
+                  />
+                </div>
+
+                <span style={{ fontWeight: '600', width: '24px', textAlign: 'right' }}>{day.max != null ? Math.round(day.max) : '--'}°</span>
+              </div>
             </div>
+
+            {/* ROW 2: Optional Parameters (Flows below primary line if active) */}
+            {(showWind || showUV || showRain || showSun) && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', fontSize: '9px', color: 'var(--text-secondary)', marginTop: '4px', paddingLeft: '55px' }}>
+                {showWind && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-purple)' }}>
+                    💨 {day.wind != null ? `${Math.round(day.wind)}` : '--'}<span style={{ fontSize: '8px', opacity: 0.7 }}>{units === 'metric' ? 'km/h' : 'mph'}</span>
+                  </span>
+                )}
+                {showUV && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-orange)' }}>
+                    ☀️ UV {day.uv != null ? Math.round(day.uv) : '--'}
+                  </span>
+                )}
+                {showRain && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-teal)' }}>
+                    💧 {day.rainAmt != null ? `${day.rainAmt.toFixed(1)}` : '0.0'}<span style={{ fontSize: '8px', opacity: 0.7 }}>{units === 'imperial' ? 'in' : 'mm'}</span>
+                  </span>
+                )}
+                {showSun && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-orange)' }}>
+                    🌅 {formatTime(day.sunrise)} / 🌇 {formatTime(day.sunset)}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         );
       })}
@@ -1078,6 +1081,16 @@ function AirQualityWidget({ aqi }) {
   const current = aqi.current;
   const usAqi = current.us_aqi || 0;
   
+  const pollenTypes = [
+    { label: 'Grass', value: current.grass_pollen },
+    { label: 'Birch', value: current.birch_pollen },
+    { label: 'Alder', value: current.alder_pollen },
+    { label: 'Ragweed', value: current.ragweed_pollen },
+    { label: 'Olive', value: current.olive_pollen },
+    { label: 'Mugwort', value: current.mugwort_pollen }
+  ];
+  const maxPollen = pollenTypes.reduce((max, p) => (p.value > (max?.value || 0) ? p : max), null);
+  
   let aqiLabel = 'Good';
   let aqiColor = 'var(--accent-green)';
   let advice = 'Air is satisfactory.';
@@ -1122,15 +1135,33 @@ function AirQualityWidget({ aqi }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 8px', fontSize: '10px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>PM2.5:</span>
-          <span style={{ fontWeight: '600' }}>{current.pm2_5 != null ? current.pm2_5.toFixed(1) : '0.0'}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 8px', fontSize: '9px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>PM2.5:</span>
+            <span style={{ fontWeight: '600' }}>{current.pm2_5 != null ? current.pm2_5.toFixed(1) : '0.0'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>PM10:</span>
+            <span style={{ fontWeight: '600' }}>{current.pm10 != null ? current.pm10.toFixed(1) : '0.0'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Ozone:</span>
+            <span style={{ fontWeight: '600' }}>{current.ozone != null ? Math.round(current.ozone) : '0'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>NO₂:</span>
+            <span style={{ fontWeight: '600' }}>{current.nitrogen_dioxide != null ? Math.round(current.nitrogen_dioxide) : '0'}</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>PM10:</span>
-          <span style={{ fontWeight: '600' }}>{current.pm10 != null ? current.pm10.toFixed(1) : '0.0'}</span>
-        </div>
+        {maxPollen && maxPollen.value > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', borderTop: '1px dashed rgba(255,255,255,0.05)', paddingTop: '4px', marginTop: '2px' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Pollen Risk:</span>
+            <span style={{ fontWeight: '600', color: 'var(--accent-blue)' }}>
+              {maxPollen.label} ({Math.round(maxPollen.value)}/m³)
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1416,7 +1447,24 @@ export default function WeatherWidget({ type, weatherData, aqiData, units, isEdi
           aqiLabel = 'Unhealthy';
           laymanMeaning = 'Everyone may begin to experience health effects, and members of sensitive groups may experience more serious health effects. Outdoor activities should be limited.';
         }
-        return `The Air Quality Index is ${Math.round(aqiVal)} (US EPA AQI), which is classified as "${aqiLabel}". In layman's terms: ${laymanMeaning} (PM2.5: ${aqiData.current.pm2_5 != null ? aqiData.current.pm2_5.toFixed(1) : '0.0'} µg/m³, PM10: ${aqiData.current.pm10 != null ? aqiData.current.pm10.toFixed(1) : '0.0'} µg/m³).`;
+        
+        const cur = aqiData.current;
+        let pollenInfo = '';
+        const activeList = [];
+        if (cur.grass_pollen > 0) activeList.push(`Grass: ${Math.round(cur.grass_pollen)}/m³`);
+        if (cur.birch_pollen > 0) activeList.push(`Birch: ${Math.round(cur.birch_pollen)}/m³`);
+        if (cur.alder_pollen > 0) activeList.push(`Alder: ${Math.round(cur.alder_pollen)}/m³`);
+        if (cur.ragweed_pollen > 0) activeList.push(`Ragweed: ${Math.round(cur.ragweed_pollen)}/m³`);
+        if (cur.olive_pollen > 0) activeList.push(`Olive: ${Math.round(cur.olive_pollen)}/m³`);
+        if (cur.mugwort_pollen > 0) activeList.push(`Mugwort: ${Math.round(cur.mugwort_pollen)}/m³`);
+        
+        if (activeList.length > 0) {
+          pollenInfo = ` Active Pollen counts: ${activeList.join(', ')}.`;
+        } else {
+          pollenInfo = ` No active pollen counts detected.`;
+        }
+        
+        return `The Air Quality Index is ${Math.round(aqiVal)} (US EPA AQI), which is classified as "${aqiLabel}". In layman's terms: ${laymanMeaning} (PM2.5: ${cur.pm2_5 != null ? cur.pm2_5.toFixed(1) : '0.0'} µg/m³, PM10: ${cur.pm10 != null ? cur.pm10.toFixed(1) : '0.0'} µg/m³).${pollenInfo}`;
       }
       case 'historical': {
         const date = new Date();

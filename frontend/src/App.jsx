@@ -390,7 +390,7 @@ export default function App() {
       latitude: targetCity.latitude,
       longitude: targetCity.longitude,
       timezone: resolvedTimezone,
-      current: 'european_aqi,us_aqi,pm2_5,pm10,nitrogen_dioxide,sulphur_dioxide,ozone,carbon_monoxide'
+      current: 'european_aqi,us_aqi,pm2_5,pm10,nitrogen_dioxide,sulphur_dioxide,ozone,carbon_monoxide,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen'
     });
 
     try {
