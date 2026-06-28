@@ -507,7 +507,7 @@ function HourlyForecastWidget({ data, units }) {
           labels={times}
           series={series}
           sunMarkers={sunMarkers}
-          currentHourMarker={currentHourIndex}
+          currentHourMarker={currentHourMarker}
         />
       </div>
     </div>
