@@ -237,8 +237,14 @@ function HourlyForecastWidget({ data, units }) {
     wind: false
   });
   const [showSun, setShowSun] = useState(false);
+  const [startOffset, setStartOffset] = useState(0);
+  const [zoomHours, setZoomHours] = useState(24);
+
   const todayIdx = hourly?.time ? Math.max(0, findCurrentHourIndex(hourly.time) - new Date().getHours()) : 0;
-  const currentHourIndex = new Date().getHours();
+  const maxOffset = hourly?.time ? hourly.time.length - todayIdx - zoomHours : 144;
+  const finalMaxOffset = Math.max(0, maxOffset);
+  
+  const startIdx = Math.max(0, Math.min(hourly?.time ? hourly.time.length - zoomHours : 0, todayIdx + startOffset));
 
   const handleToggleMetric = (m) => {
     setActiveMetrics(prev => {
@@ -249,12 +255,12 @@ function HourlyForecastWidget({ data, units }) {
     });
   };
 
-  const tempData = hourly?.temperature_2m ? hourly.temperature_2m.slice(todayIdx, todayIdx + 24) : [];
-  const rainData = hourly?.precipitation ? hourly.precipitation.slice(todayIdx, todayIdx + 24) : [];
-  const uvData = hourly?.uv_index ? hourly.uv_index.slice(todayIdx, todayIdx + 24) : [];
-  const windData = hourly?.wind_speed_10m ? hourly.wind_speed_10m.slice(todayIdx, todayIdx + 24) : [];
+  const tempData = hourly?.temperature_2m ? hourly.temperature_2m.slice(startIdx, startIdx + zoomHours) : [];
+  const rainData = hourly?.precipitation ? hourly.precipitation.slice(startIdx, startIdx + zoomHours) : [];
+  const uvData = hourly?.uv_index ? hourly.uv_index.slice(startIdx, startIdx + zoomHours) : [];
+  const windData = hourly?.wind_speed_10m ? hourly.wind_speed_10m.slice(startIdx, startIdx + zoomHours) : [];
 
-  const times = hourly && hourly.time ? hourly.time.slice(todayIdx, todayIdx + 24).map(t => {
+  const times = hourly && hourly.time ? hourly.time.slice(startIdx, startIdx + zoomHours).map(t => {
     const d = new Date(t);
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   }) : [];
@@ -273,34 +279,50 @@ function HourlyForecastWidget({ data, units }) {
     series.push({ name: 'wind', label: 'Wind', data: windData, color: 'var(--accent-purple)', unit: units === 'metric' ? ' km/h' : ' mph' });
   }
 
+  // Calculate current hour marker index relative to startIdx
+  const curHourIdx = hourly?.time ? findCurrentHourIndex(hourly.time) : 0;
+  const relativeCurrentHourIndex = curHourIdx - startIdx;
+  const currentHourMarker = (relativeCurrentHourIndex >= 0 && relativeCurrentHourIndex < zoomHours)
+    ? relativeCurrentHourIndex
+    : null;
+
   // Find matching sunrise/sunset times
   const sunMarkers = [];
   if (showSun && daily && daily.sunrise && daily.sunset) {
-    const todayDailyIdx = findTodayDailyIndex(daily.time);
-    const riseDate = new Date(daily.sunrise[todayDailyIdx]);
-    const setDate = new Date(daily.sunset[todayDailyIdx]);
+    const riseDates = daily.sunrise.map(s => new Date(s));
+    const setDates = daily.sunset.map(s => new Date(s));
 
-    const hourlyTimes = hourly && hourly.time ? hourly.time.slice(todayIdx, todayIdx + 24) : [];
-    hourlyTimes.forEach((t, idx) => {
+    const visibleHours = hourly && hourly.time ? hourly.time.slice(startIdx, startIdx + zoomHours) : [];
+    visibleHours.forEach((t, idx) => {
       const d = new Date(t);
-      if (d.getDate() === riseDate.getDate() && d.getHours() === riseDate.getHours()) {
+      const isSunrise = riseDates.some(r => r.getDate() === d.getDate() && r.getHours() === d.getHours());
+      const isSunset = setDates.some(s => s.getDate() === d.getDate() && s.getHours() === d.getHours());
+      if (isSunrise) {
         sunMarkers.push({ index: idx, type: 'sunrise' });
       }
-      if (d.getDate() === setDate.getDate() && d.getHours() === setDate.getHours()) {
+      if (isSunset) {
         sunMarkers.push({ index: idx, type: 'sunset' });
       }
     });
   }
 
+  // Generate day selectors for the next 7 days starting from today
+  const todayDailyIdx = findTodayDailyIndex(daily?.time);
+  const days = daily?.time ? daily.time.slice(todayDailyIdx, todayDailyIdx + 7).map((t, idx) => {
+    const date = new Date(t);
+    const dayName = idx === 0 ? 'Today' : date.toLocaleDateString([], { weekday: 'short' });
+    return { dayName, idx };
+  }) : [];
+
   return (
     <div style={{ flex: 1, padding: '12px 16px 16px 16px', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      {/* Selector controls for active chart type */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '8px',
+      {/* Row 1: Selector controls for active chart type */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          marginBottom: '6px',
           paddingBottom: '6px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           flexWrap: 'wrap',
@@ -356,6 +378,128 @@ function HourlyForecastWidget({ data, units }) {
         >
           ☀️ Sun Markers
         </button>
+      </div>
+
+      {/* Row 2: Time navigation and granularity */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          marginBottom: '10px',
+          gap: '8px',
+          flexWrap: 'wrap'
+        }}
+      >
+        {/* Dynamic Day Quick-Jumps */}
+        <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', flex: 1 }}>
+          {days.map((d) => {
+            const isActive = Math.floor(startOffset / 24) === d.idx;
+            return (
+              <button
+                key={d.idx}
+                onClick={() => setStartOffset(Math.max(0, Math.min(finalMaxOffset, d.idx * 24)))}
+                style={{
+                  background: isActive ? 'var(--accent-blue-glow)' : 'rgba(255,255,255,0.01)',
+                  border: `1px solid ${isActive ? 'var(--accent-blue)' : 'rgba(255,255,255,0.05)'}`,
+                  borderRadius: '4px',
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontSize: '9px',
+                  padding: '2px 5px',
+                  cursor: 'pointer',
+                  fontWeight: isActive ? 'bold' : 'normal',
+                  transition: 'all 0.15s'
+                }}
+              >
+                {d.dayName}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Shifting Arrows, Reset & Zoom Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '2px' }}>
+            <button
+              onClick={() => setStartOffset(prev => Math.max(0, prev - zoomHours))}
+              title={`Back ${zoomHours}h`}
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: 'var(--text-primary)',
+                padding: '2px 6px',
+                fontSize: '10px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              ←
+            </button>
+            
+            <button
+              onClick={() => {
+                setStartOffset(0);
+                setZoomHours(24);
+              }}
+              title="Reset to default 24h"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: 'var(--text-primary)',
+                padding: '2px 6px',
+                fontSize: '10px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Reset
+            </button>
+            
+            <button
+              onClick={() => setStartOffset(prev => Math.max(0, Math.min(finalMaxOffset, prev + zoomHours)))}
+              title={`Forward ${zoomHours}h`}
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: 'var(--text-primary)',
+                padding: '2px 6px',
+                fontSize: '10px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              →
+            </button>
+          </div>
+
+          <select
+            value={zoomHours}
+            onChange={(e) => {
+              const nextZoom = parseInt(e.target.value, 10);
+              setZoomHours(nextZoom);
+              // Re-clamp startOffset with new zoom boundary
+              const nextMaxOffset = Math.max(0, hourly?.time ? hourly.time.length - todayIdx - nextZoom : 144);
+              setStartOffset(prev => Math.max(0, Math.min(nextMaxOffset, prev)));
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '4px',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              padding: '2px 4px',
+              outline: 'none',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-body)'
+            }}
+          >
+            <option value={6} style={{ background: '#111827', color: '#fff' }}>6h</option>
+            <option value={12} style={{ background: '#111827', color: '#fff' }}>12h</option>
+            <option value={24} style={{ background: '#111827', color: '#fff' }}>24h</option>
+            <option value={48} style={{ background: '#111827', color: '#fff' }}>48h</option>
+            <option value={72} style={{ background: '#111827', color: '#fff' }}>72h</option>
+          </select>
+        </div>
       </div>
 
       <div style={{ flex: 1, minHeight: 0 }}>
